@@ -17,7 +17,7 @@ board_3x3 = chess_api.BoardWrapper_3x3()
 args = {
     'lr': 0.001,
     'dropout': 0.3,
-    'epochs': 1,
+    'epochs': 5,
     'batch_size': 200,
     'shuffle': True,
     'cuda': False,
