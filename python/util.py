@@ -1,22 +1,21 @@
 import numpy as np
-from scipy.sparse import csr_matrix
 
-def dense_to_sparse(dense_array):
-    """
-    Convert a dense 3D NumPy array to a sparse CSR matrix.
-    """
-    # Reshape the 3D array to 2D before converting to CSR matrix
-    dense_array_2d = dense_array.reshape((dense_array.shape[0], -1))
-    sparse_array = csr_matrix(dense_array_2d)
-    return sparse_array
+# def dense_to_sparse(dense_array):
+#     """
+#     Convert a dense 3D NumPy array to a sparse CSR matrix.
+#     """
+#     # Reshape the 3D array to 2D before converting to CSR matrix
+#     dense_array_2d = dense_array.reshape((dense_array.shape[0], -1))
+#     sparse_array = csr_matrix(dense_array_2d)
+#     return sparse_array
 
-def sparse_to_dense(sparse_array, original_shape=(8, 8, 64)):
-    """
-    Convert a sparse CSR matrix to a dense 3D NumPy array with the original shape.
-    """
-    dense_array_2d = sparse_array.toarray()
-    dense_array = dense_array_2d.reshape(original_shape)
-    return dense_array
+# def sparse_to_dense(sparse_array, original_shape=(8, 8, 64)):
+#     """
+#     Convert a sparse CSR matrix to a dense 3D NumPy array with the original shape.
+#     """
+#     dense_array_2d = sparse_array.toarray()
+#     dense_array = dense_array_2d.reshape(original_shape)
+#     return dense_array
 
 def flip_action_array(action_array):
     n = len(action_array) // 8

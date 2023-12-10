@@ -14,8 +14,8 @@ board_3x3 = chess_api.BoardWrapper_3x3()
 args = {
     'lr': 0.001,
     'dropout': 0.3,
-    'epochs': 5,
-    'batch_size': 200,
+    'epochs': 10,
+    'batch_size': 2000,
     'shuffle': True,
     'cuda': False,
 }
@@ -30,20 +30,27 @@ class ChessNN():
             # Neural Net
             self.input_boards = Input(shape=data_shape)
             
-            h_conv1 = Activation('relu')(Conv3D(100, (2, 2, self.num_channels), padding='same', use_bias=False, input_shape=data_shape)(self.input_boards))
+            h_conv1 = Activation('relu')(Conv3D(512, (2, 2, self.num_channels), padding='same', use_bias=False, input_shape=data_shape)(self.input_boards))
             h_conv1 = BatchNormalization(axis=1)(h_conv1)
 
-            h_conv2 = Activation('relu')(Conv3D(100, (2, 2, self.num_channels), padding='same', use_bias=False)(h_conv1))
+            h_conv2 = Activation('relu')(Conv3D(512, (2, 2, self.num_channels), padding='same', use_bias=False)(h_conv1))
             h_conv2 = BatchNormalization(axis=1)(h_conv2)
+            
+            h_conv3 = Activation('relu')(Conv3D(512, (2, 2, self.num_channels), padding='same', use_bias=False)(h_conv1))
+            h_conv3 = BatchNormalization(axis=1)(h_conv3)
+            
+            h_conv4 = Activation('relu')(Conv3D(512, (2, 2, self.num_channels), padding='same', use_bias=False)(h_conv1))
+            h_conv4 = BatchNormalization(axis=1)(h_conv4)
 
-            h_conv2_flat = Flatten()(h_conv2)
+            h_conv2_flat = Flatten()(h_conv4)
 
             s_fc1 = Dropout(args['dropout'])(Activation('relu')(BatchNormalization(axis=1)(Dense(1024, use_bias=False, kernel_initializer='he_normal')(h_conv2_flat))))
             s_fc2 = Dropout(args['dropout'])(Activation('relu')(BatchNormalization(axis=1)(Dense(512, use_bias=False, kernel_initializer='he_normal')(s_fc1))))
+            s_fc3 = Dropout(args['dropout'])(Activation('relu')(BatchNormalization(axis=1)(Dense(256, use_bias=False, kernel_initializer='he_normal')(s_fc2))))
 
-            self.pi = Dense(board_3x3.num_actions_in_action_space, activation='softmax', name='pi')(s_fc2)
+            self.pi = Dense(board_3x3.num_actions_in_action_space, activation='softmax', name='pi')(s_fc3)
             self.pi_shaped = Reshape(board_3x3.action_space_size)(self.pi)
-            self.v = Dense(1, activation='tanh', name='v')(s_fc2)
+            self.v = Dense(1, activation='tanh', name='v')(s_fc3)
 
             optimizer = Adam(clipvalue=0.5)  # Adjust the clipvalue accordingly
             self.model = Model(inputs=[self.input_boards], outputs=[self.pi_shaped, self.v])

@@ -78,6 +78,23 @@ class BoardWrapper(chess.Board):
     action_space_size = action_space.shape
     num_actions_in_action_space = len(action_space.flatten())
     
+    def outcome(self, claim_draw=False):
+        if self.is_checkmate():
+            if self.turn == chess.WHITE:
+                return "Checkmate - Black wins"
+            else:
+                return "Checkmate - White wins"
+        elif self.is_stalemate():
+            return "Stalemate"
+        elif self.is_insufficient_material():
+            return "Insufficient Material"
+        elif self.can_claim_fifty_moves() and claim_draw:
+            return "Fifty Move Rule"
+        elif self.can_claim_threefold_repetition() and claim_draw:
+            return "Threefold Repetition"
+        else:
+            return None
+    
     def action_2_action_space_ndx(self, pdd_move):
         return tuple([int(ndx) for ndx in np.where(self.action_space==pdd_move)])
         
@@ -249,10 +266,10 @@ class BoardWrapper(chess.Board):
         move_prob_maps = []
         mcts_eng = MCTS.MCTSEngine(NN, args)
         while self.terminal_value()==None:
-            if moves%5 == 0:
+            if moves%50 == 0:
                 print(f"Move: {moves+1} in Game: {game_num+1}/{args['numEps']} of Train Step: {train_step_num+1}/{args['numTrainingEps']}")
-                print(self)
-                print()
+                # print(self)
+                # print()
             turn, binary_board, move_prob_map = self.plan_act_remember(args, mcts_eng, moves)
             binary_boards.append((binary_board))
             turns.append(turn)
@@ -272,7 +289,7 @@ class BoardWrapper(chess.Board):
             for (bb, t, mpm, v) in zip(binary_boards, turns, move_prob_maps, vs):
                 examples.append((bb, t, mpm, t*v))
             reasons.append(reason)  
-            print(reason)
+            print(f"Ending: {reason} in Game: {game_num+1}/{args['numEps']} of Train Step: {train_step_num+1}/{args['numTrainingEps']}")   
                 
         return examples, reasons
     
@@ -284,7 +301,7 @@ class BoardWrapper(chess.Board):
         for (bb, t, mpm, v) in zip(binary_boards, turns, move_prob_maps, vs):
             examples.append((bb, mpm, t*v))
         reason
-        print(reason)
+        print(f"Ending: {reason} in Game: {ep+1}/{args['numEps']} of Train Step: {train_step_num+1}/{args['numTrainingEps']}") 
                 
         return examples, reason
     

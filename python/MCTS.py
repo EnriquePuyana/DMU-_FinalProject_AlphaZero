@@ -3,9 +3,6 @@ import math
 import chess_api
 import chess
 import numpy as np
-from scipy.sparse import coo_matrix
-import util
-import copy
 import time
 
 import numpy as np

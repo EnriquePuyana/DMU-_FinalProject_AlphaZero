@@ -1,7 +1,7 @@
 #%% File
 import numpy as np 
 import chess_api
-from ChessNN import NNetWrapper
+from ChessNN_large import NNetWrapper
 import MCTS
 import time
 import util
@@ -24,22 +24,22 @@ eval_boards = [chess_api.BoardWrapper_3x3(fen) for fen in winning_fens]
 eval_boards.extend(train_boards)
 
 load_data = True
-load_number = 285
+load_number = 39
 nnet = NNetWrapper(three_by_three=True)
 if load_data:
-    nnet.load_checkpoint(folder='board_3x3', filename=f"checkpoint_mcts25_eps50_fen2_{load_number}")
-    with open(f'/home/mapu3213/gitrepos/DMU-_FinalProject_AlphaZero/data/eval_data_mcts25_eps50_fen2_{load_number}.pkl', 'rb') as file:
+    nnet.load_checkpoint(folder='board_3x3', filename=f"checkpoint_large_mcts25_eps100_fen2_{load_number}")
+    with open(f'/home/mapu3213/gitrepos/DMU-_FinalProject_AlphaZero/data/eval_data_large_mcts25_eps50_fen2_{load_number}.pkl', 'rb') as file:
             # Load the data from the pickle file
             pickle_data = pickle.load(file)
 
 args = {
     # 'numIters': 1000,
-    'numEps': 100,                          # Number of complete self-play games to simulate during a new iteration.
+    'numEps': 500,                          # Number of complete self-play games to simulate during a new iteration.
     'numTrainingEps': 100000,                  # Number of times to run numEps
     'tempThreshold': 15,                    # When to start always playing the best action
     # 'updateThreshold': 0.55,              # During arena playoff, new neural net will be accepted if threshold or more of games are won.
-    'maxBufferSize': 100000,                # Number of game examples to train the neural networks.
-    'trainBatchSize': 1000,                 # Number of experience tuples to train the network on
+    'maxBufferSize': 1000000,                # Number of game examples to train the neural networks.
+    'trainBatchSize': 10000,                 # Number of experience tuples to train the network on
     'numMCTSSims': 25,                      # Number of games moves for MCTS to simulat 
     'MCTSThinkTime': None,                  # Think time # Not in use
     'arenaCompare': 40,                     # Number of games to play during arena play to determine if new net will be accepted.
@@ -111,9 +111,9 @@ if __name__=='__main__':
             
             times.append(args['numEps']*(ndx_train_step+1)*len(train_boards))
             
-            if ndx_train_step%15==0:
-                nnet.save_checkpoint(folder='board_3x3', filename=f'checkpoint_mcts25_eps50_fen2_{ndx_train_step}.pth.tar')
-                with open(f'/home/mapu3213/gitrepos/DMU-_FinalProject_AlphaZero/data/eval_data_mcts25_eps50_fen2_{ndx_train_step}.pkl', 'wb') as picklefile:
+            if ndx_train_step%1==0:
+                nnet.save_checkpoint(folder='board_3x3', filename=f'checkpoint_large_mcts25_eps100_fen2_{ndx_train_step}.pth.tar')
+                with open(f'/home/mapu3213/gitrepos/DMU-_FinalProject_AlphaZero/data/eval_data_large_mcts25_eps50_fen2_{ndx_train_step}.pkl', 'wb') as picklefile:
                     pickle.dump((experience_buffer, times, evals_vs, evals_pis_1, evals_pis_n1), picklefile) # Save the experience so you can keep training with that data
                 
             fig, ax = plt.subplots() 
@@ -125,7 +125,7 @@ if __name__=='__main__':
             ax.set_ylabel('Evaluation')
             ax.set_ylim((-1.1, 1.1))
             fig.set_dpi(500)
-            plt.savefig('/home/mapu3213/gitrepos/DMU-_FinalProject_AlphaZero/Figs/evals.png')
+            plt.savefig('/home/mapu3213/gitrepos/DMU-_FinalProject_AlphaZero/Figs/evals_large.png')
             
             fig, ax = plt.subplots() 
             # ax.grid(True, linestyle=':')
@@ -137,7 +137,7 @@ if __name__=='__main__':
             ax.legend(loc='best', fancybox=True, framealpha=1, handlelength=1)
             ax.set_ylim((0, 1.1))
             fig.set_dpi(500)
-            plt.savefig('/home/mapu3213/gitrepos/DMU-_FinalProject_AlphaZero/Figs/white2win.png')
+            plt.savefig('/home/mapu3213/gitrepos/DMU-_FinalProject_AlphaZero/Figs/white2win_large.png')
             
             fig, ax = plt.subplots() 
             # ax.grid(True, linestyle=':')
@@ -149,7 +149,7 @@ if __name__=='__main__':
             ax.legend(loc='best', fancybox=True, framealpha=1, handlelength=1)
             ax.set_ylim((0, 1.1))
             fig.set_dpi(500)
-            plt.savefig('/home/mapu3213/gitrepos/DMU-_FinalProject_AlphaZero/Figs/black2win.png') 
+            plt.savefig('/home/mapu3213/gitrepos/DMU-_FinalProject_AlphaZero/Figs/black2win_large.png') 
             
         ndx_train_step += 1
     end_time_p = time.time()
